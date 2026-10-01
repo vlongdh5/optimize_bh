@@ -1,0 +1,1175 @@
+{
+ "vp_prod_ops_transaction_account.PostTransaction": {
+  "filters": [
+   [
+    "State",
+    17,
+    17
+   ],
+   [
+    "IncludeExclude",
+    15,
+    12
+   ],
+   [
+    "PropertyId",
+    13,
+    13
+   ],
+   [
+    "BusinessDate",
+    11,
+    11
+   ],
+   [
+    "TransactionAccountCode",
+    10,
+    8
+   ],
+   [
+    "Amount",
+    8,
+    7
+   ],
+   [
+    "CategoryCode",
+    5,
+    4
+   ],
+   [
+    "TransactionReferenceType",
+    5,
+    5
+   ],
+   [
+    "OrganizationId",
+    4,
+    4
+   ],
+   [
+    "CategoryType",
+    3,
+    3
+   ],
+   [
+    "PostingSource",
+    3,
+    3
+   ],
+   [
+    "TransactionType",
+    2,
+    2
+   ],
+   [
+    "RoomNumber",
+    2,
+    2
+   ],
+   [
+    "CashierCode",
+    2,
+    2
+   ],
+   [
+    "CreatedAt",
+    1,
+    1
+   ],
+   [
+    "ConfirmationNumber",
+    1,
+    1
+   ],
+   [
+    "EInvoiceStatus",
+    1,
+    1
+   ],
+   [
+    "ArticleCode",
+    1,
+    1
+   ],
+   [
+    "IsDeposit",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "Id",
+    10,
+    7
+   ],
+   [
+    "ReservationId",
+    3,
+    3
+   ],
+   [
+    "ConfirmationNumber",
+    2,
+    2
+   ],
+   [
+    "FolioId",
+    1,
+    1
+   ],
+   [
+    "BusinessDate",
+    1,
+    1
+   ]
+  ],
+  "wrapped": {
+   "toYear": 2,
+   "excludeProperty(...)": 8
+  }
+ },
+ "vp_prod_ops_activity_log.activity_log": {
+  "filters": [
+   [
+    "created_at",
+    3,
+    3
+   ],
+   [
+    "organization_id",
+    1,
+    1
+   ],
+   [
+    "activity_group_id",
+    1,
+    1
+   ],
+   [
+    "property_id",
+    1,
+    1
+   ],
+   [
+    "activity_type_id",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "id",
+    15,
+    2
+   ]
+  ],
+  "wrapped": {
+   "toYear": 2,
+   "excludeProperty(...)": 1
+  }
+ },
+ "vp_prod_ops_transaction_account.EInvoiceTransactionParty": {
+  "filters": [
+   [
+    "PropertyId",
+    1,
+    1
+   ],
+   [
+    "PostTransactionId",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "PostTransactionId",
+    1,
+    1
+   ],
+   [
+    "Id",
+    1,
+    1
+   ]
+  ],
+  "wrapped": {
+   "excludeProperty(...)": 1
+  }
+ },
+ "vp_prod_ops_front_office.ReservationSnapshot": {
+  "filters": [
+   [
+    "Status",
+    4,
+    4
+   ],
+   [
+    "RoomTypeCode",
+    3,
+    3
+   ],
+   [
+    "PropertyId",
+    3,
+    3
+   ],
+   [
+    "CiActualCheckoutDate",
+    1,
+    1
+   ],
+   [
+    "ArrivalDate",
+    1,
+    1
+   ],
+   [
+    "RrEffectiveRateAmount",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "ReservationId",
+    2,
+    2
+   ],
+   [
+    "BizDateSnapshotAt",
+    2,
+    2
+   ]
+  ],
+  "wrapped": {
+   "excludeProperty(...)": 3
+  }
+ },
+ "vp_prod_ops_front_office.StayingSnapshot": {
+  "filters": [
+   [
+    "PropertyId",
+    2,
+    2
+   ],
+   [
+    "BizDateSnapshotAt",
+    1,
+    1
+   ],
+   [
+    "Status",
+    1,
+    1
+   ],
+   [
+    "ProfProfileType",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "ReservationId",
+    2,
+    2
+   ],
+   [
+    "BizDateSnapshotAt",
+    2,
+    2
+   ]
+  ],
+  "wrapped": {
+   "excludeProperty(...)": 2
+  }
+ },
+ "vp_prod_ops_transaction_account.AutomationPostingActivity": {
+  "filters": [
+   [
+    "PropertyId",
+    3,
+    3
+   ],
+   [
+    "State",
+    2,
+    2
+   ]
+  ],
+  "joins": [
+   [
+    "PropertyId",
+    1,
+    1
+   ],
+   [
+    "ReservationId",
+    1,
+    1
+   ]
+  ],
+  "wrapped": {
+   "excludeProperty(...)": 3
+  }
+ },
+ "vp_prod_pms_fnb.OrderDetails": {
+  "filters": [
+   [
+    "IsDelete",
+    1,
+    1
+   ],
+   [
+    "OrderDetailStatus",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "OrderId",
+    1,
+    1
+   ]
+  ],
+  "wrapped": {}
+ },
+ "vp_prod_ops_transaction_account.post_transaction_gross_info": {
+  "filters": [
+   [
+    "post_id",
+    1,
+    1
+   ],
+   [
+    "property_id",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "post_id",
+    1,
+    1
+   ]
+  ],
+  "wrapped": {
+   "excludeProperty(...)": 1
+  }
+ },
+ "vp_prod_pms_rate.AllotmentInventoryRecord": {
+  "filters": [
+   [
+    "date",
+    7,
+    7
+   ],
+   [
+    "isVilla",
+    3,
+    3
+   ],
+   [
+    "quantity",
+    2,
+    2
+   ],
+   [
+    "allotmentId",
+    2,
+    2
+   ],
+   [
+    "roomTypeId",
+    2,
+    2
+   ]
+  ],
+  "joins": [
+   [
+    "date",
+    12,
+    11
+   ],
+   [
+    "allotmentId",
+    12,
+    12
+   ],
+   [
+    "id",
+    5,
+    5
+   ],
+   [
+    "roomTypeId",
+    5,
+    4
+   ],
+   [
+    "isVilla",
+    2,
+    2
+   ]
+  ],
+  "wrapped": {}
+ },
+ "vp_prod_pms_rate.RoomInventoryRecord": {
+  "filters": [],
+  "joins": [
+   [
+    "date",
+    2,
+    1
+   ],
+   [
+    "roomTypeId",
+    2,
+    1
+   ]
+  ],
+  "wrapped": {}
+ },
+ "vp_prod_ops_front_office.PmsProfile": {
+  "filters": [
+   [
+    "ProfileType",
+    16,
+    14
+   ],
+   [
+    "PropertyId",
+    9,
+    9
+   ],
+   [
+    "Dob",
+    1,
+    1
+   ],
+   [
+    "ReferenceId",
+    1,
+    1
+   ],
+   [
+    "IsVerified",
+    1,
+    1
+   ],
+   [
+    "OrganizationId",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "Id",
+    51,
+    29
+   ],
+   [
+    "ReservationId",
+    32,
+    21
+   ],
+   [
+    "ReferenceId",
+    2,
+    1
+   ],
+   [
+    "ProfileType",
+    1,
+    1
+   ]
+  ],
+  "wrapped": {
+   "excludeProperty(...)": 8,
+   "lower": 1
+  }
+ },
+ "vp_prod_ops_front_office.ReservationRoomRate": {
+  "filters": [
+   [
+    "IsDeleted",
+    6,
+    6
+   ],
+   [
+    "PropertyId",
+    4,
+    4
+   ],
+   [
+    "StayingDate",
+    3,
+    3
+   ],
+   [
+    "EffectiveRateAmount",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "ReservationId",
+    11,
+    10
+   ],
+   [
+    "StayingDate",
+    6,
+    4
+   ],
+   [
+    "OrganizationId",
+    3,
+    1
+   ],
+   [
+    "IsDeleted",
+    1,
+    1
+   ]
+  ],
+  "wrapped": {
+   "excludeProperty(...)": 3,
+   "binToString": 1
+  }
+ },
+ "vp_prod_ops_transaction_account.PostTransactionInhouseInfo": {
+  "filters": [
+   [
+    "ProfileId",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "PostTransactionId",
+    1,
+    1
+   ]
+  ],
+  "wrapped": {
+   "excludeProperty(...)": 1
+  }
+ },
+ "vp_prod_pms_fnb.Orders": {
+  "filters": [
+   [
+    "OrderStatus",
+    3,
+    3
+   ],
+   [
+    "CreatedDate",
+    1,
+    1
+   ],
+   [
+    "OrganizationId",
+    1,
+    1
+   ],
+   [
+    "IsDelete",
+    1,
+    1
+   ],
+   [
+    "Organization",
+    1,
+    1
+   ],
+   [
+    "BusinessDate",
+    1,
+    1
+   ],
+   [
+    "OutletId",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "PropertyId",
+    1,
+    1
+   ],
+   [
+    "Code",
+    1,
+    1
+   ]
+  ],
+  "wrapped": {
+   "toYear": 2
+  }
+ },
+ "vp_prod_pms_fnb.OrderPayments": {
+  "filters": [
+   [
+    "IsDelete",
+    1,
+    1
+   ],
+   [
+    "PaymentMethod",
+    1,
+    1
+   ],
+   [
+    "Organization",
+    1,
+    1
+   ],
+   [
+    "OutletId",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "OrderId",
+    2,
+    2
+   ],
+   [
+    "PropertyId",
+    1,
+    1
+   ]
+  ],
+  "wrapped": {}
+ },
+ "vp_prod_ops_accounts_receivable.ARInvoice": {
+  "filters": [
+   [
+    "Type",
+    4,
+    2
+   ],
+   [
+    "PropertyId",
+    3,
+    2
+   ],
+   [
+    "Status",
+    1,
+    1
+   ],
+   [
+    "DateBalance",
+    1,
+    1
+   ],
+   [
+    "InvoiceDate",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "Id",
+    1,
+    1
+   ]
+  ],
+  "wrapped": {
+   "excludeProperty(...)": 2
+  }
+ },
+ "vp_prod_ops_front_office.Reservation": {
+  "filters": [
+   [
+    "Status",
+    23,
+    22
+   ],
+   [
+    "PropertyId",
+    22,
+    22
+   ],
+   [
+    "ArrivalDate",
+    8,
+    8
+   ],
+   [
+    "ConfirmationNumber",
+    4,
+    4
+   ],
+   [
+    "DepartureDate",
+    4,
+    4
+   ],
+   [
+    "RoomTypeCode",
+    3,
+    3
+   ],
+   [
+    "ReservationId",
+    2,
+    2
+   ],
+   [
+    "AssignedRoomNumber",
+    2,
+    2
+   ],
+   [
+    "RoomClassCode",
+    1,
+    1
+   ],
+   [
+    "BookingDate",
+    1,
+    1
+   ],
+   [
+    "OrganizationId",
+    1,
+    1
+   ],
+   [
+    "RoomTypeId",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "ReservationId",
+    19,
+    17
+   ],
+   [
+    "ConfirmationNumber",
+    11,
+    11
+   ],
+   [
+    "OrganizationId",
+    5,
+    1
+   ],
+   [
+    "PropertyId",
+    2,
+    2
+   ],
+   [
+    "RoomClassCode",
+    1,
+    1
+   ],
+   [
+    "Status",
+    1,
+    1
+   ],
+   [
+    "Id",
+    1,
+    1
+   ]
+  ],
+  "wrapped": {
+   "excludeProperty(...)": 11,
+   "lower": 12,
+   "binToString": 10
+  }
+ },
+ "vp_prod_res_booking.ReservationRoomRate": {
+  "filters": [],
+  "joins": [
+   [
+    "ReservationID",
+    3,
+    3
+   ],
+   [
+    "StayDate",
+    1,
+    1
+   ],
+   [
+    "ID",
+    1,
+    1
+   ]
+  ],
+  "wrapped": {}
+ },
+ "vp_prod_ops_front_office.Staying": {
+  "filters": [
+   [
+    "PropertyId",
+    1,
+    1
+   ],
+   [
+    "Status",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "ProfileId",
+    3,
+    3
+   ],
+   [
+    "ReservationId",
+    2,
+    2
+   ]
+  ],
+  "wrapped": {
+   "excludeProperty(...)": 1
+  }
+ },
+ "vp_prod_ops_transaction_account.Folio": {
+  "filters": [
+   [
+    "PropertyId",
+    4,
+    4
+   ],
+   [
+    "State",
+    2,
+    2
+   ],
+   [
+    "Balance",
+    1,
+    1
+   ],
+   [
+    "Id",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "Id",
+    6,
+    6
+   ],
+   [
+    "ReservationId",
+    2,
+    2
+   ]
+  ],
+  "wrapped": {
+   "excludeProperty(...)": 2
+  }
+ },
+ "vp_prod_ops_front_office.reservation_package_update_log": {
+  "filters": [
+   [
+    "property_id",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "id",
+    1,
+    1
+   ]
+  ],
+  "wrapped": {
+   "excludeProperty(...)": 1
+  }
+ },
+ "vp_prod_ops_transaction_account.Reservation": {
+  "filters": [
+   [
+    "Status",
+    5,
+    3
+   ],
+   [
+    "PropertyId",
+    5,
+    3
+   ],
+   [
+    "CurrentLedger",
+    2,
+    2
+   ]
+  ],
+  "joins": [
+   [
+    "Id",
+    1,
+    1
+   ]
+  ],
+  "wrapped": {
+   "excludeProperty(...)": 1,
+   "lower": 4
+  }
+ },
+ "vp_prod_ops_pms_profile.Profile": {
+  "filters": [
+   [
+    "PropertyId",
+    5,
+    5
+   ],
+   [
+    "ProfileType",
+    1,
+    1
+   ],
+   [
+    "State",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "Id",
+    52,
+    32
+   ],
+   [
+    "ProfileType",
+    20,
+    10
+   ],
+   [
+    "State",
+    4,
+    2
+   ]
+  ],
+  "wrapped": {
+   "excludeProperty(...)": 4
+  }
+ },
+ "vp_prod_res_booking.Reservation": {
+  "filters": [
+   [
+    "PropertyID",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "ID",
+    2,
+    2
+   ]
+  ],
+  "wrapped": {
+   "excludeProperty(...)": 1
+  }
+ },
+ "vp_prod_ops_transaction_account.PostTransactionForecast": {
+  "filters": [
+   [
+    "State",
+    1,
+    1
+   ],
+   [
+    "IncludeExclude",
+    1,
+    1
+   ],
+   [
+    "BusinessDate",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "OriginalConfirmationNumber",
+    1,
+    1
+   ],
+   [
+    "BusinessDate",
+    1,
+    1
+   ]
+  ],
+  "wrapped": {}
+ },
+ "vp_prod_ops_transaction_account.EInvoiceSummary": {
+  "filters": [
+   [
+    "PropertyId",
+    2,
+    2
+   ],
+   [
+    "Status",
+    2,
+    2
+   ],
+   [
+    "Id",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "Id",
+    1,
+    1
+   ]
+  ],
+  "wrapped": {
+   "excludeProperty(...)": 2
+  }
+ },
+ "vp_prod_ops_front_office.RoomAssignment": {
+  "filters": [
+   [
+    "State",
+    4,
+    4
+   ],
+   [
+    "RoomTypeCode",
+    1,
+    1
+   ],
+   [
+    "FromDate",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "ReservationId",
+    2,
+    2
+   ],
+   [
+    "Id",
+    2,
+    2
+   ],
+   [
+    "RoomId",
+    1,
+    1
+   ]
+  ],
+  "wrapped": {}
+ },
+ "vp_prod_ops_front_office.CheckIn": {
+  "filters": [
+   [
+    "PropertyId",
+    3,
+    3
+   ],
+   [
+    "ReservationId",
+    1,
+    1
+   ]
+  ],
+  "joins": [
+   [
+    "ReservationId",
+    10,
+    10
+   ],
+   [
+    "OrganizationId",
+    3,
+    1
+   ],
+   [
+    "ActualCheckoutDate",
+    1,
+    1
+   ]
+  ],
+  "wrapped": {
+   "excludeProperty(...)": 3
+  }
+ },
+ "vp_prod_pms_house_keeping.hk_v2_group_room": {
+  "filters": [],
+  "joins": [
+   [
+    "groupId",
+    1,
+    1
+   ]
+  ],
+  "wrapped": {}
+ },
+ "vp_prod_aux_task_management.task": {
+  "filters": [
+   [
+    "isDeleted",
+    1,
+    1
+   ],
+   [
+    "organizationId",
+    1,
+    1
+   ],
+   [
+    "createdAt",
+    1,
+    1
+   ],
+   [
+    "hotelId",
+    1,
+    1
+   ],
+   [
+    "dueDate",
+    1,
+    1
+   ]
+  ],
+  "joins": [],
+  "wrapped": {
+   "toYear": 2,
+   "date": 1
+  }
+ }
+}

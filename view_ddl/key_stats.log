@@ -1,0 +1,6 @@
+vp_prod_ops_transaction_account.PostTransaction 74.0 Code: 241.
+DB::Exception: host = cnch-default-server-1: Worker host:33.0.96.163:8124, Code: 241, e.displayText() = DB::Exception: host = vw-3000550035-vinhms-0: Memory limit (total) exceeded: would us
+vp_prod_ops_activity_log.activity_log 5.7 Code: 241.
+DB::Exception: host = cnch-default-server-0: Worker host:33.0.96.163:8124, Code: 241, e.displayText() = DB::Exception: host = vw-3000550035-vinhms-0: Memory limit (total) exceeded: would us
+vp_prod_ops_transaction_account.EInvoiceTransactionParty 1.9 Code: 241.
+DB::Exception: host = cnch-default-server-1: Worker host:33.0.96.163:8124, Code: 241, e.displayText() = DB::Exception: host = vw-3000550035-vinhms-0: Memory limit (total) exceeded: would us

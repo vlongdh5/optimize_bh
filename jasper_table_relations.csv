@@ -1,0 +1,331 @@
+﻿report_name,context,alias,source_ref,table,table_engine,underlying_tables_if_view,usage,join_condition,filter_condition
+aging_summary,main query,,subquery ,vp_prod_ops_accounts_receivable.ARInvoice,CnchMergeTree,,FROM,,
+aging_summary,main query,,subquery ,vp_prod_ops_accounts_receivable.AccountsReceivable,CnchMergeTree,,FROM,,
+aging_summary,main query,,subquery ,vp_prod_ops_accounts_receivable.ARCreditLimit,CnchMergeTree,,FROM,,
+aging_summary,main query,final,CTE final,vp_prod_ops_accounts_receivable.ARInvoice,CnchMergeTree,,FROM,,ar_type IN ('$arTypes')
+aging_summary,main query,final,CTE final,vp_prod_ops_accounts_receivable.AccountsReceivable,CnchMergeTree,,FROM,,ar_type IN ('$arTypes')
+aging_summary,main query,final,CTE final,vp_prod_ops_accounts_receivable.ARCreditLimit,CnchMergeTree,,FROM,,ar_type IN ('$arTypes')
+aging_summary,CTE ar_invoice,ARInvoice,direct,vp_prod_ops_accounts_receivable.ARInvoice,CnchMergeTree,,FROM,,"Type IN (0, 1, 4) AND PropertyId IN ('$propertyId')"
+aging_summary,CTE accounts_receivable,AccountsReceivable,direct,vp_prod_ops_accounts_receivable.AccountsReceivable,CnchMergeTree,,FROM,,
+aging_summary,CTE ar_credit_limit,ARCreditLimit,direct,vp_prod_ops_accounts_receivable.ARCreditLimit,CnchMergeTree,,FROM,,
+aging_summary,CTE final,ar_invoice,CTE ar_invoice,vp_prod_ops_accounts_receivable.ARInvoice,CnchMergeTree,,FROM,,(ar_invoice.status = 0 AND date(ar_invoice.invoice_date) <= toDate(now('Asia/Bangkok'))) OR (ar_invoice.status = 1 AND date(ar_invoice.invoice_date) <= toDate(now('Asia/Bangkok')) AND date(ar_invoice.date_balance) > toDate(now('Asia/Bangkok')))
+aging_summary,CTE final,accounts_receivable,CTE accounts_receivable,vp_prod_ops_accounts_receivable.AccountsReceivable,CnchMergeTree,,LEFT JOIN,ar_invoice.ar_id = accounts_receivable.id,
+aging_summary,CTE final,ar_credit_limit,CTE ar_credit_limit,vp_prod_ops_accounts_receivable.ARCreditLimit,CnchMergeTree,,LEFT JOIN,ar_invoice.ar_id = ar_credit_limit.ar_id AND ar_invoice.property_id = ar_credit_limit.property_id,
+alerts,main query,,subquery ,vp_prod_ops_front_office.ReservationAlert,CnchMergeTree,,FROM,,
+alerts,main query,,subquery ,vp_prod_ops_front_office.AlertConfig,CnchMergeTree,,FROM,,
+alerts,main query,,subquery ,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,
+alerts,main query,,subquery ,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,
+alerts,main query,,subquery ,vp_prod_cts_customer.user,CnchMergeTree,,FROM,,
+alerts,main query,reservation_alert,CTE reservation_alert,vp_prod_ops_front_office.ReservationAlert,CnchMergeTree,,FROM,,
+alerts,main query,alert_config,CTE alert_config,vp_prod_ops_front_office.AlertConfig,CnchMergeTree,,LEFT JOIN,reservation_alert.code_id = alert_config.id,
+alerts,main query,reservation,CTE reservation,vp_prod_ops_front_office.Reservation,CnchMergeTree,,LEFT JOIN,reservation_alert.reservation_id = reservation.reservation_id,reservation.arrival_date = toDate(now('Asia/Bangkok')) OR reservation.status = 'Inhouse'
+alerts,main query,pms_profile,CTE pms_profile,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,LEFT JOIN,pms_profile.id = reservation.main_guest_profile_id,
+alerts,main query,user1,CTE cts_user,vp_prod_cts_customer.user,CnchMergeTree,,LEFT JOIN,binToString(reservation_alert.created_by) = user1.id,
+alerts,main query,user2,CTE cts_user,vp_prod_cts_customer.user,CnchMergeTree,,LEFT JOIN,binToString(reservation_alert.modified_by) = user2.id,
+alerts,CTE reservation_alert,ReservationAlert,direct,vp_prod_ops_front_office.ReservationAlert,CnchMergeTree,,FROM,,binToString(PropertyId) IN ('$propertyId')
+alerts,CTE alert_config,AlertConfig,direct,vp_prod_ops_front_office.AlertConfig,CnchMergeTree,,FROM,,
+alerts,CTE reservation,Reservation,direct,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,lower(Status) <> 'canceled'
+alerts,CTE pms_profile,PmsProfile,direct,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,
+alerts,CTE cts_user,user,direct,vp_prod_cts_customer.user,CnchMergeTree,,FROM,,
+arrival_list_7days,main query,,subquery ,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,
+arrival_list_7days,main query,,subquery ,vp_prod_pms_property.pro_room_type,CnchMergeTree,,FROM,,
+arrival_list_7days,main query,,subquery ,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,
+arrival_list_7days,main query,,subquery ,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,
+arrival_list_7days,main query,,subquery ,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+arrival_list_7days,main query,,subquery ,vp_prod_ops_front_office.SpecialRequest,CnchMergeTree,,FROM,,
+arrival_list_7days,main query,,subquery ,vp_prod_ops_front_office.Room,CnchMergeTree,,FROM,,
+arrival_list_7days,main query,reservation,CTE reservation,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,"(room.is_deleted = 0 AND room.is_psuedo = 0) OR reservation.assigned_room_number IS NULL AND reservation.arrival_date >= DATE_ADD(toDate(now('Asia/Bangkok')), INTERVAL '1' DAY) AND reservation.arrival_date <= DATE_ADD(toDate(now('Asia/Bangkok')), INTERVAL '7' DAY) AND CASE WHEN '$etaFrom' IS NULL AND '$etaTo' IS NULL THEN TRUE WHEN '$etaFrom' IS NULL AND NOT ('$etaTo' IS NULL) THEN CAST(coalesce(eta, '1970-01-01') AS TIME) <= CAST(coalesce('$etaTo', '1970-01-01') AS TIME) WHEN NOT ('$etaFrom' IS NULL) AND '$etaTo' IS NULL THEN CAST(coalesce(eta, '1970-01-01') AS TIME) >= CAST(coalesce('$etaFrom', '1970-01-01') AS TIME) ELSE CAST(coalesce(eta, '1970-01-01') AS TIME) BETWEEN CAST(coalesce('$etaFrom', '1970-01-01') AS TIME) AND CAST(coalesce('$etaTo', '1970-01-01') AS TIME) END AND [unqualified] CASE WHEN '$isCheckedInToday' THEN TRUE ELSE room_status IN ('Precheckin', 'Reserved') END"
+arrival_list_7days,main query,room_type,CTE room_type,vp_prod_pms_property.pro_room_type,CnchMergeTree,,LEFT JOIN,room_type.id = binToString(reservation.room_type_id),"room_type.is_deleted = 0 AND room_type.is_pseudo = 0 AND [unqualified] CASE WHEN '$isCheckedInToday' THEN TRUE ELSE room_status IN ('Precheckin', 'Reserved') END"
+arrival_list_7days,main query,profile_guest,CTE profile_guest,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,LEFT JOIN,profile_guest.reservation_id = reservation.reservation_id,"lower(profile_guest.profile_type) IN ('mainguest', 'accompanyguest') AND CASE WHEN '$isVipOnly' THEN vip_code <> '' ELSE TRUE END AND CASE WHEN '$isMainGuestOnly' THEN profile_type = 'MainGuest' ELSE TRUE END AND [unqualified] CASE WHEN '$isCheckedInToday' THEN TRUE ELSE room_status IN ('Precheckin', 'Reserved') END"
+arrival_list_7days,main query,profile,CTE profile,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,LEFT JOIN,profile_guest.reference_id = profile.id,"[unqualified] CASE WHEN '$isCheckedInToday' THEN TRUE ELSE room_status IN ('Precheckin', 'Reserved') END"
+arrival_list_7days,main query,profile_agent,CTE profile_agent,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,LEFT JOIN,profile_agent.id = binToString(reservation.travel_agent_profile_id) AND binToString(reservation.reservation_id) = profile_agent.reservation_id,"[unqualified] CASE WHEN '$isCheckedInToday' THEN TRUE ELSE room_status IN ('Precheckin', 'Reserved') END"
+arrival_list_7days,main query,profile_company,CTE profile_company,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,LEFT JOIN,profile_company.id = binToString(reservation.company_profile_id) AND binToString(reservation.reservation_id) = profile_company.reservation_id,"[unqualified] CASE WHEN '$isCheckedInToday' THEN TRUE ELSE room_status IN ('Precheckin', 'Reserved') END"
+arrival_list_7days,main query,special_request,CTE special_request,vp_prod_ops_front_office.SpecialRequest,CnchMergeTree,,LEFT JOIN,special_request.reservation_id = reservation.reservation_id,"[unqualified] CASE WHEN '$isCheckedInToday' THEN TRUE ELSE room_status IN ('Precheckin', 'Reserved') END"
+arrival_list_7days,main query,room,CTE room,vp_prod_ops_front_office.Room,CnchMergeTree,,LEFT JOIN,room.id = reservation.assigned_room_id,"(room.is_deleted = 0 AND room.is_psuedo = 0) OR reservation.assigned_room_number IS NULL AND [unqualified] CASE WHEN '$isCheckedInToday' THEN TRUE ELSE room_status IN ('Precheckin', 'Reserved') END"
+arrival_list_7days,CTE reservation,Reservation,direct,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,"NOT (lower(Status) IN ('canceled', 'noshow')) AND binToString(PropertyId) IN ('$propertyId')"
+arrival_list_7days,CTE room_type,pro_room_type,direct,vp_prod_pms_property.pro_room_type,CnchMergeTree,,FROM,,
+arrival_list_7days,CTE profile_guest,PmsProfile,direct,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,
+arrival_list_7days,CTE profile,Profile,direct,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,
+arrival_list_7days,CTE special_request,SpecialRequest,direct,vp_prod_ops_front_office.SpecialRequest,CnchMergeTree,,FROM,,
+arrival_list_7days,CTE room,Room,direct,vp_prod_ops_front_office.Room,CnchMergeTree,,FROM,,
+arrival_list_7days,CTE profile_agent,v_stg__profile_alias,direct,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+arrival_list_7days,CTE profile_company,profile_agent,CTE profile_agent,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+arrival_list_today,main query,,subquery ,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,
+arrival_list_today,main query,,subquery ,vp_prod_pms_property.pro_room_type,CnchMergeTree,,FROM,,
+arrival_list_today,main query,,subquery ,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,
+arrival_list_today,main query,,subquery ,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,
+arrival_list_today,main query,,subquery ,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+arrival_list_today,main query,,subquery ,vp_prod_ops_front_office.SpecialRequest,CnchMergeTree,,FROM,,
+arrival_list_today,main query,,subquery ,vp_prod_ops_front_office.Room,CnchMergeTree,,FROM,,
+arrival_list_today,main query,reservation,CTE reservation,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,"(room.is_deleted = 0 AND room.is_psuedo = 0) OR reservation.assigned_room_number IS NULL AND reservation.arrival_date = toDate(now('Asia/Bangkok')) AND CASE WHEN '$etaFrom' IS NULL AND '$etaTo' IS NULL THEN TRUE WHEN '$etaFrom' IS NULL AND NOT ('$etaTo' IS NULL) THEN CAST(coalesce(eta, '1970-01-01') AS TIME) <= CAST(coalesce('$etaTo', '1970-01-01') AS TIME) WHEN NOT ('$etaFrom' IS NULL) AND '$etaTo' IS NULL THEN CAST(coalesce(eta, '1970-01-01') AS TIME) >= CAST(coalesce('$etaFrom', '1970-01-01') AS TIME) ELSE CAST(coalesce(eta, '1970-01-01') AS TIME) BETWEEN CAST(coalesce('$etaFrom', '1970-01-01') AS TIME) AND CAST(coalesce('$etaTo', '1970-01-01') AS TIME) END AND [unqualified] CASE WHEN '$isCheckedInToday' THEN TRUE ELSE room_status IN ('Precheckin', 'Reserved') END"
+arrival_list_today,main query,room_type,CTE room_type,vp_prod_pms_property.pro_room_type,CnchMergeTree,,LEFT JOIN,room_type.id = binToString(reservation.room_type_id),"room_type.is_deleted = 0 AND room_type.is_pseudo = 0 AND [unqualified] CASE WHEN '$isCheckedInToday' THEN TRUE ELSE room_status IN ('Precheckin', 'Reserved') END"
+arrival_list_today,main query,profile_guest,CTE profile_guest,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,LEFT JOIN,profile_guest.reservation_id = reservation.reservation_id,"lower(profile_guest.profile_type) IN ('mainguest', 'accompanyguest') AND CASE WHEN '$isVipOnly' THEN vip_code <> '' ELSE TRUE END AND CASE WHEN '$isMainGuestOnly' THEN profile_type = 'MainGuest' ELSE TRUE END AND [unqualified] CASE WHEN '$isCheckedInToday' THEN TRUE ELSE room_status IN ('Precheckin', 'Reserved') END"
+arrival_list_today,main query,profile,CTE profile,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,LEFT JOIN,profile_guest.reference_id = profile.id,"[unqualified] CASE WHEN '$isCheckedInToday' THEN TRUE ELSE room_status IN ('Precheckin', 'Reserved') END"
+arrival_list_today,main query,profile_agent,CTE profile_agent,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,LEFT JOIN,profile_agent.id = binToString(reservation.travel_agent_profile_id) AND binToString(reservation.reservation_id) = profile_agent.reservation_id,"[unqualified] CASE WHEN '$isCheckedInToday' THEN TRUE ELSE room_status IN ('Precheckin', 'Reserved') END"
+arrival_list_today,main query,profile_company,CTE profile_company,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,LEFT JOIN,profile_company.id = binToString(reservation.company_profile_id) AND binToString(reservation.reservation_id) = profile_company.reservation_id,"[unqualified] CASE WHEN '$isCheckedInToday' THEN TRUE ELSE room_status IN ('Precheckin', 'Reserved') END"
+arrival_list_today,main query,special_request,CTE special_request,vp_prod_ops_front_office.SpecialRequest,CnchMergeTree,,LEFT JOIN,special_request.reservation_id = reservation.reservation_id,"[unqualified] CASE WHEN '$isCheckedInToday' THEN TRUE ELSE room_status IN ('Precheckin', 'Reserved') END"
+arrival_list_today,main query,room,CTE room,vp_prod_ops_front_office.Room,CnchMergeTree,,LEFT JOIN,room.id = reservation.assigned_room_id,"(room.is_deleted = 0 AND room.is_psuedo = 0) OR reservation.assigned_room_number IS NULL AND [unqualified] CASE WHEN '$isCheckedInToday' THEN TRUE ELSE room_status IN ('Precheckin', 'Reserved') END"
+arrival_list_today,CTE reservation,Reservation,direct,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,"NOT (lower(Status) IN ('canceled', 'noshow')) AND binToString(PropertyId) IN ('$propertyId')"
+arrival_list_today,CTE room_type,pro_room_type,direct,vp_prod_pms_property.pro_room_type,CnchMergeTree,,FROM,,
+arrival_list_today,CTE profile_guest,PmsProfile,direct,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,
+arrival_list_today,CTE profile,Profile,direct,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,
+arrival_list_today,CTE special_request,SpecialRequest,direct,vp_prod_ops_front_office.SpecialRequest,CnchMergeTree,,FROM,,
+arrival_list_today,CTE room,Room,direct,vp_prod_ops_front_office.Room,CnchMergeTree,,FROM,,
+arrival_list_today,CTE profile_agent,v_stg__profile_alias,direct,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+arrival_list_today,CTE profile_company,profile_agent,CTE profile_agent,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+cancellation,main query,,subquery ,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,
+cancellation,main query,,subquery ,vp_prod_ops_front_office.Cancellation,CnchMergeTree,,FROM,,
+cancellation,main query,,subquery ,vp_prod_ops_front_office.CancellationConfig,CnchMergeTree,,FROM,,
+cancellation,main query,,subquery ,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,
+cancellation,main query,,subquery ,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,
+cancellation,main query,,subquery ,datamart_v2.stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+cancellation,main query,,subquery ,vp_prod_ops_front_office.ReservationRoomRate,CnchMergeTree,,FROM,,
+cancellation,main query,reservation,CTE reservation,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,reservation.arrival_date = toDate(now('Asia/Bangkok'))
+cancellation,main query,cancellation,CTE cancellation,vp_prod_ops_front_office.Cancellation,CnchMergeTree,,LEFT JOIN,reservation.reservation_id = cancellation.reservation_id,
+cancellation,main query,cancellation_config,CTE cancellation_config,vp_prod_ops_front_office.CancellationConfig,CnchMergeTree,,LEFT JOIN,cancellation.cancellation_config_id = cancellation_config.id,
+cancellation,main query,profile_guest,CTE profile_guest,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,LEFT JOIN,profile_guest.id = reservation.main_guest_profile_id,lower(profile_guest.profile_type) = 'mainguest'
+cancellation,main query,profile,CTE profile,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,LEFT JOIN,profile_guest.reference_id = profile.id,
+cancellation,main query,profile_agent,CTE profile_agent,datamart_v2.stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,LEFT JOIN,profile_agent.id = binToString(reservation.travel_agent_profile_id) AND binToString(reservation.reservation_id) = profile_agent.reservation_id,
+cancellation,main query,profile_company,CTE profile_company,datamart_v2.stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,LEFT JOIN,profile_company.id = binToString(reservation.company_profile_id) AND binToString(reservation.reservation_id) = profile_company.reservation_id,
+cancellation,main query,reservation_room_rate,CTE reservation_room_rate,vp_prod_ops_front_office.ReservationRoomRate,CnchMergeTree,,LEFT JOIN,reservation.reservation_id = reservation_room_rate.reservation_id AND reservation.arrival_date = reservation_room_rate.staying_date,
+cancellation,CTE reservation,Reservation,direct,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,lower(Status) = 'canceled' AND binToString(PropertyId) IN ('$propertyId')
+cancellation,CTE cancellation,Cancellation,direct,vp_prod_ops_front_office.Cancellation,CnchMergeTree,,FROM,,
+cancellation,CTE cancellation_config,CancellationConfig,direct,vp_prod_ops_front_office.CancellationConfig,CnchMergeTree,,FROM,,
+cancellation,CTE profile_guest,PmsProfile,direct,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,
+cancellation,CTE profile,Profile,direct,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,
+cancellation,CTE profile_agent,stg__profile_alias,direct,datamart_v2.stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+cancellation,CTE profile_company,profile_agent,CTE profile_agent,datamart_v2.stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+cancellation,CTE reservation_room_rate,ReservationRoomRate,direct,vp_prod_ops_front_office.ReservationRoomRate,CnchMergeTree,,FROM,,is_deleted = 0
+departure_list_7days,main query,,subquery ,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,
+departure_list_7days,main query,,subquery ,vp_prod_pms_property.pro_room_type,CnchMergeTree,,FROM,,
+departure_list_7days,main query,,subquery ,vp_prod_ops_front_office.CheckIn,CnchMergeTree,,FROM,,
+departure_list_7days,main query,,subquery ,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,
+departure_list_7days,main query,,subquery ,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,
+departure_list_7days,main query,,subquery ,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+departure_list_7days,main query,reservation,CTE reservation,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,"reservation.departure_date >= DATE_ADD(toDate(now('Asia/Bangkok')), INTERVAL '1' DAY) AND reservation.departure_date <= DATE_ADD(toDate(now('Asia/Bangkok')), INTERVAL '7' DAY)"
+departure_list_7days,main query,room_type,CTE room_type,vp_prod_pms_property.pro_room_type,CnchMergeTree,,LEFT JOIN,binToString(reservation.room_type_id) = room_type.id,room_type.is_pseudo = 0 OR room_type.is_pseudo IS NULL
+departure_list_7days,main query,check_in,CTE check_in,vp_prod_ops_front_office.CheckIn,CnchMergeTree,,LEFT JOIN,reservation.reservation_id = check_in.reservation_id,
+departure_list_7days,main query,profile_guest,CTE profile_guest,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,LEFT JOIN,reservation.reservation_id = profile_guest.reservation_id,"lower(profile_guest.profile_type) IN ('mainguest', 'accompanyguest')"
+departure_list_7days,main query,profile,CTE profile,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,LEFT JOIN,profile_guest.reference_id = profile.id,
+departure_list_7days,main query,profile_agent,CTE profile_agent,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,LEFT JOIN,binToString(reservation.travel_agent_profile_id) = profile_agent.id AND binToString(reservation.reservation_id) = profile_agent.reservation_id,
+departure_list_7days,main query,profile_company,CTE profile_company,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,LEFT JOIN,binToString(reservation.company_profile_id) = profile_company.id AND binToString(reservation.reservation_id) = profile_company.reservation_id,
+departure_list_7days,CTE reservation,Reservation,direct,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,"NOT (lower(Status) IN ('canceled', 'noshow')) AND binToString(PropertyId) IN ('$propertyId')"
+departure_list_7days,CTE room_type,pro_room_type,direct,vp_prod_pms_property.pro_room_type,CnchMergeTree,,FROM,,
+departure_list_7days,CTE check_in,CheckIn,direct,vp_prod_ops_front_office.CheckIn,CnchMergeTree,,FROM,,
+departure_list_7days,CTE profile_guest,PmsProfile,direct,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,CASE WHEN '$isMainGuestOnly' THEN ProfileType = 'MainGuest' ELSE TRUE END
+departure_list_7days,CTE profile,Profile,direct,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,
+departure_list_7days,CTE profile_agent,v_stg__profile_alias,direct,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+departure_list_7days,CTE profile_company,profile_agent,CTE profile_agent,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+departure_list_today,main query,,subquery ,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,
+departure_list_today,main query,,subquery ,vp_prod_pms_property.pro_room_type,CnchMergeTree,,FROM,,
+departure_list_today,main query,,subquery ,vp_prod_ops_front_office.CheckIn,CnchMergeTree,,FROM,,
+departure_list_today,main query,,subquery ,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,
+departure_list_today,main query,,subquery ,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,
+departure_list_today,main query,,subquery ,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+departure_list_today,main query,reservation,CTE reservation,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,reservation.departure_date = toDate(now('Asia/Bangkok'))
+departure_list_today,main query,room_type,CTE room_type,vp_prod_pms_property.pro_room_type,CnchMergeTree,,LEFT JOIN,binToString(reservation.room_type_id) = room_type.id,room_type.is_pseudo = 0 OR room_type.is_pseudo IS NULL
+departure_list_today,main query,check_in,CTE check_in,vp_prod_ops_front_office.CheckIn,CnchMergeTree,,LEFT JOIN,reservation.reservation_id = check_in.reservation_id,
+departure_list_today,main query,profile_guest,CTE profile_guest,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,LEFT JOIN,reservation.reservation_id = profile_guest.reservation_id,"lower(profile_guest.profile_type) IN ('mainguest', 'accompanyguest')"
+departure_list_today,main query,profile,CTE profile,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,LEFT JOIN,profile_guest.reference_id = profile.id,
+departure_list_today,main query,profile_agent,CTE profile_agent,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,LEFT JOIN,binToString(reservation.travel_agent_profile_id) = profile_agent.id AND binToString(reservation.reservation_id) = profile_agent.reservation_id,
+departure_list_today,main query,profile_company,CTE profile_company,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,LEFT JOIN,binToString(reservation.company_profile_id) = profile_company.id AND binToString(reservation.reservation_id) = profile_company.reservation_id,
+departure_list_today,CTE reservation,Reservation,direct,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,"NOT (lower(Status) IN ('canceled', 'noshow')) AND binToString(PropertyId) IN ('$propertyId')"
+departure_list_today,CTE room_type,pro_room_type,direct,vp_prod_pms_property.pro_room_type,CnchMergeTree,,FROM,,
+departure_list_today,CTE check_in,CheckIn,direct,vp_prod_ops_front_office.CheckIn,CnchMergeTree,,FROM,,
+departure_list_today,CTE profile_guest,PmsProfile,direct,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,CASE WHEN '$isMainGuestOnly' THEN ProfileType = 'MainGuest' ELSE TRUE END
+departure_list_today,CTE profile,Profile,direct,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,
+departure_list_today,CTE profile_agent,v_stg__profile_alias,direct,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+departure_list_today,CTE profile_company,profile_agent,CTE profile_agent,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+deposit_ledger,main query,,subquery ,vp_prod_ops_transaction_account.PostTransaction,CnchMergeTree,,FROM,,
+deposit_ledger,main query,,subquery ,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,
+deposit_ledger,main query,,subquery ,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,
+deposit_ledger,main query,,subquery ,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,
+deposit_ledger,main query,post_transaction,CTE post_transaction,vp_prod_ops_transaction_account.PostTransaction,CnchMergeTree,,FROM,,
+deposit_ledger,main query,reservation,CTE reservation,vp_prod_ops_front_office.Reservation,CnchMergeTree,,LEFT JOIN,post_transaction.reservation_id = binToString(reservation.reservation_id),
+deposit_ledger,main query,profile_guest,CTE profile_guest,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,LEFT JOIN,profile_guest.id = reservation.main_guest_profile_id,lower(profile_type) = 'mainguest'
+deposit_ledger,main query,profile,CTE profile,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,LEFT JOIN,profile_guest.reference_id = profile.id,
+deposit_ledger,CTE post_transaction,PostTransaction,direct,vp_prod_ops_transaction_account.PostTransaction,CnchMergeTree,,FROM,,IsDeposit = 1 AND State = 1 AND PropertyId IN ('$propertyId')
+deposit_ledger,CTE reservation,Reservation,direct,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,binToString(PropertyId) IN ('$propertyId')
+deposit_ledger,CTE profile_guest,PmsProfile,direct,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,PropertyId IN ('$propertyId')
+deposit_ledger,CTE profile,Profile,direct,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,PropertyId IN ('$propertyId')
+guest_inh_pm_account_by_room,main query,,subquery ,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,
+guest_inh_pm_account_by_room,main query,,subquery ,vp_prod_ops_front_office.Room,CnchMergeTree,,FROM,,
+guest_inh_pm_account_by_room,main query,,subquery ,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,
+guest_inh_pm_account_by_room,main query,,subquery ,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,
+guest_inh_pm_account_by_room,main query,,subquery ,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+guest_inh_pm_account_by_room,main query,reservation,CTE reservation,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,
+guest_inh_pm_account_by_room,main query,room,CTE room,vp_prod_ops_front_office.Room,CnchMergeTree,,INNER JOIN,room.id = reservation.assigned_room_id,room.is_deleted = 0 AND room.is_psuedo = 1
+guest_inh_pm_account_by_room,main query,profile_guest,CTE profile_guest,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,LEFT JOIN,profile_guest.reservation_id = reservation.reservation_id,lower(profile_guest.profile_type) = 'mainguest'
+guest_inh_pm_account_by_room,main query,profile,CTE profile,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,LEFT JOIN,profile_guest.reference_id = profile.id,
+guest_inh_pm_account_by_room,main query,profile_agent,CTE profile_agent,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,LEFT JOIN,profile_agent.id = binToString(reservation.travel_agent_profile_id) AND binToString(reservation.reservation_id) = profile_agent.reservation_id,
+guest_inh_pm_account_by_room,main query,profile_company,CTE profile_company,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,LEFT JOIN,profile_company.id = binToString(reservation.company_profile_id) AND binToString(reservation.reservation_id) = profile_company.reservation_id,
+guest_inh_pm_account_by_room,CTE reservation,Reservation,direct,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,lower(Status) = 'inhouse' AND binToString(PropertyId) IN ('$propertyId') AND RoomTypeId IN ('$roomTypeIds')
+guest_inh_pm_account_by_room,CTE room,Room,direct,vp_prod_ops_front_office.Room,CnchMergeTree,,FROM,,
+guest_inh_pm_account_by_room,CTE profile_guest,PmsProfile,direct,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,
+guest_inh_pm_account_by_room,CTE profile,Profile,direct,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,
+guest_inh_pm_account_by_room,CTE profile_agent,v_stg__profile_alias,direct,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+guest_inh_pm_account_by_room,CTE profile_company,profile_agent,CTE profile_agent,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+guest_inhouse_rate_check,main query,,subquery ,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,
+guest_inhouse_rate_check,main query,,subquery ,vp_prod_pms_property.pro_room_type,CnchMergeTree,,FROM,,
+guest_inhouse_rate_check,main query,,subquery ,vp_prod_ops_front_office.ReservationRoomRate,CnchMergeTree,,FROM,,
+guest_inhouse_rate_check,main query,,subquery ,vp_prod_ops_transaction_account.FixedCharge,CnchMergeTree,,FROM,,
+guest_inhouse_rate_check,main query,,subquery ,vp_prod_ops_front_office.Staying,CnchMergeTree,,FROM,,
+guest_inhouse_rate_check,main query,,subquery ,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,
+guest_inhouse_rate_check,main query,,subquery ,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,
+guest_inhouse_rate_check,main query,reservation,CTE reservation,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,
+guest_inhouse_rate_check,main query,room_type,CTE room_type,vp_prod_pms_property.pro_room_type,CnchMergeTree,,LEFT JOIN,binToString(reservation.room_type_id) = room_type.id,room_type.is_deleted = 0 AND room_type.is_pseudo = 0
+guest_inhouse_rate_check,main query,reservation_room_rate,CTE reservation_room_rate,vp_prod_ops_front_office.ReservationRoomRate,CnchMergeTree,,LEFT JOIN,reservation_room_rate.reservation_id = reservation.reservation_id,reservation_room_rate.staying_date = toDate(now('Asia/Bangkok'))
+guest_inhouse_rate_check,main query,fixed_charge,CTE fixed_charge,vp_prod_ops_transaction_account.FixedCharge,CnchMergeTree,,LEFT JOIN,binToString(reservation.reservation_id) = fixed_charge.reservation_id,
+guest_inhouse_rate_check,main query,staying,CTE staying,vp_prod_ops_front_office.Staying,CnchMergeTree,,LEFT JOIN,staying.reservation_id = reservation.reservation_id,
+guest_inhouse_rate_check,main query,profile_guest,CTE profile_guest,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,LEFT JOIN,profile_guest.reservation_id = staying.reservation_id AND profile_guest.id = staying.profile_id,lower(profile_guest.profile_type) = 'mainguest'
+guest_inhouse_rate_check,main query,profile,CTE profile,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,LEFT JOIN,profile_guest.reference_id = profile.id,
+guest_inhouse_rate_check,CTE reservation,Reservation,direct,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,"lower(Status) IN ('inhouse', 'checkout') AND binToString(PropertyId) IN ('$propertyId')"
+guest_inhouse_rate_check,CTE room_type,pro_room_type,direct,vp_prod_pms_property.pro_room_type,CnchMergeTree,,FROM,,
+guest_inhouse_rate_check,CTE reservation_room_rate,ReservationRoomRate,direct,vp_prod_ops_front_office.ReservationRoomRate,CnchMergeTree,,FROM,,IsDeleted = 0 AND binToString(PropertyId) IN ('$propertyId')
+guest_inhouse_rate_check,CTE fixed_charge,FixedCharge,direct,vp_prod_ops_transaction_account.FixedCharge,CnchMergeTree,,FROM,,
+guest_inhouse_rate_check,CTE profile_guest,PmsProfile,direct,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,
+guest_inhouse_rate_check,CTE profile,Profile,direct,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,
+guest_inhouse_rate_check,CTE staying,Staying,direct,vp_prod_ops_front_office.Staying,CnchMergeTree,,FROM,,
+guest_ledger,main query,,subquery ,vp_prod_ops_transaction_account.Reservation,CnchMergeTree,,FROM,,
+guest_ledger,main query,,subquery ,vp_prod_ops_transaction_account.PostTransaction,CnchMergeTree,,FROM,,
+guest_ledger,main query,,subquery ,vp_prod_ops_transaction_account.Folio,CnchMergeTree,,FROM,,
+guest_ledger,main query,reservation,CTE reservation,vp_prod_ops_transaction_account.Reservation,CnchMergeTree,,FROM,,
+guest_ledger,main query,post_transaction_folio,CTE post_transaction_folio,vp_prod_ops_transaction_account.PostTransaction,CnchMergeTree,,LEFT JOIN,post_transaction_folio.reservation_id = reservation.id,"post_transaction_folio.state = 1 AND bitAnd(post_transaction_folio.include_exclude, 1) = 1"
+guest_ledger,main query,post_transaction_folio,CTE post_transaction_folio,vp_prod_ops_transaction_account.Folio,CnchMergeTree,,LEFT JOIN,post_transaction_folio.reservation_id = reservation.id,"post_transaction_folio.state = 1 AND bitAnd(post_transaction_folio.include_exclude, 1) = 1"
+guest_ledger,CTE folio,Folio,direct,vp_prod_ops_transaction_account.Folio,CnchMergeTree,,FROM,,PropertyId IN ('$propertyId')
+guest_ledger,CTE post_transaction,PostTransaction,direct,vp_prod_ops_transaction_account.PostTransaction,CnchMergeTree,,FROM,,PropertyId IN ('$propertyId')
+guest_ledger,CTE post_transaction_folio,post_transaction,CTE post_transaction,vp_prod_ops_transaction_account.PostTransaction,CnchMergeTree,,FROM,,
+guest_ledger,CTE post_transaction_folio,folio,CTE folio,vp_prod_ops_transaction_account.Folio,CnchMergeTree,,LEFT JOIN,folio.id = post_transaction.folio_id,
+guest_ledger,CTE reservation,Reservation,direct,vp_prod_ops_transaction_account.Reservation,CnchMergeTree,,FROM,,lower(Status) <> 'inhouse' AND CurrentLedger = 'GL' AND Status IN ('$reservationStatuses') AND PropertyId IN ('$propertyId')
+guest_ledger,CTE reservation,Reservation,direct,vp_prod_ops_transaction_account.Reservation,CnchMergeTree,,FROM,,lower(Status) = 'inhouse' AND Status IN ('$reservationStatuses') AND PropertyId IN ('$propertyId')
+guest_ledger_detail,main query,,subquery ,vp_prod_ops_transaction_account.Reservation,CnchMergeTree,,FROM,,
+guest_ledger_detail,main query,,subquery ,vp_prod_ops_transaction_account.PostTransaction,CnchMergeTree,,FROM,,
+guest_ledger_detail,main query,,subquery ,vp_prod_ops_transaction_account.Folio,CnchMergeTree,,FROM,,
+guest_ledger_detail,main query,reservation,CTE reservation,vp_prod_ops_transaction_account.Reservation,CnchMergeTree,,FROM,,
+guest_ledger_detail,main query,post_transaction_folio,CTE post_transaction_folio,vp_prod_ops_transaction_account.PostTransaction,CnchMergeTree,,LEFT JOIN,post_transaction_folio.reservation_id = reservation.id,"post_transaction_folio.state = 1 AND bitAnd(post_transaction_folio.include_exclude, 1) = 1 AND post_transaction_folio.amount <> 0"
+guest_ledger_detail,main query,post_transaction_folio,CTE post_transaction_folio,vp_prod_ops_transaction_account.Folio,CnchMergeTree,,LEFT JOIN,post_transaction_folio.reservation_id = reservation.id,"post_transaction_folio.state = 1 AND bitAnd(post_transaction_folio.include_exclude, 1) = 1 AND post_transaction_folio.amount <> 0"
+guest_ledger_detail,CTE folio,Folio,direct,vp_prod_ops_transaction_account.Folio,CnchMergeTree,,FROM,,PropertyId IN ('$propertyId')
+guest_ledger_detail,CTE post_transaction,PostTransaction,direct,vp_prod_ops_transaction_account.PostTransaction,CnchMergeTree,,FROM,,PropertyId IN ('$propertyId')
+guest_ledger_detail,CTE post_transaction_folio,post_transaction,CTE post_transaction,vp_prod_ops_transaction_account.PostTransaction,CnchMergeTree,,FROM,,
+guest_ledger_detail,CTE post_transaction_folio,folio,CTE folio,vp_prod_ops_transaction_account.Folio,CnchMergeTree,,LEFT JOIN,folio.id = post_transaction.folio_id,
+guest_ledger_detail,CTE reservation,Reservation,direct,vp_prod_ops_transaction_account.Reservation,CnchMergeTree,,FROM,,lower(Status) <> 'inhouse' AND CurrentLedger = 'GL' AND Status IN ('$reservationStatuses') AND PropertyId IN ('$propertyId')
+guest_ledger_detail,CTE reservation,Reservation,direct,vp_prod_ops_transaction_account.Reservation,CnchMergeTree,,FROM,,lower(Status) = 'inhouse' AND Status IN ('$reservationStatuses') AND PropertyId IN ('$propertyId')
+house_keeping_list_with_room_status,main query,,subquery ,vp_prod_pms_house_keeping.hk_v2_group,CnchMergeTree,,FROM,,
+house_keeping_list_with_room_status,main query,,subquery ,vp_prod_pms_house_keeping.hk_shift,CnchMergeTree,,FROM,,
+house_keeping_list_with_room_status,main query,,subquery ,vp_prod_pms_house_keeping.hk_v2_group_user_task,CnchMergeTree,,FROM,,
+house_keeping_list_with_room_status,main query,,subquery ,vp_prod_pms_house_keeping.hk_user,CnchMergeTree,,FROM,,
+house_keeping_list_with_room_status,main query,,subquery ,vp_prod_pms_house_keeping.hk_v2_group_room,CnchMergeTree,,FROM,,
+house_keeping_list_with_room_status,main query,,subquery ,vp_prod_pms_house_keeping.hk_v2_room,CnchMergeTree,,FROM,,
+house_keeping_list_with_room_status,main query,,subquery ,vp_prod_pms_house_keeping.hk_v2_room_reservation,CnchMergeTree,,FROM,,
+house_keeping_list_with_room_status,main query,hk_v2_group,CTE hk_v2_group,vp_prod_pms_house_keeping.hk_v2_group,CnchMergeTree,,FROM,,hk_v2_group.date = toDate(now('Asia/Bangkok'))
+house_keeping_list_with_room_status,main query,hk_shift,CTE hk_shift,vp_prod_pms_house_keeping.hk_shift,CnchMergeTree,,LEFT JOIN,hk_shift.id = hk_v2_group.shift_id,
+house_keeping_list_with_room_status,main query,assigned,CTE assigned,vp_prod_pms_house_keeping.hk_v2_group_user_task,CnchMergeTree,,LEFT JOIN,assigned.group_id = hk_v2_group.id,
+house_keeping_list_with_room_status,main query,assigned,CTE assigned,vp_prod_pms_house_keeping.hk_user,CnchMergeTree,,LEFT JOIN,assigned.group_id = hk_v2_group.id,
+house_keeping_list_with_room_status,main query,room,CTE room,vp_prod_pms_house_keeping.hk_v2_group_room,CnchMergeTree,,INNER JOIN,room.group_id = hk_v2_group.id,
+house_keeping_list_with_room_status,main query,room,CTE room,vp_prod_pms_house_keeping.hk_v2_room,CnchMergeTree,,INNER JOIN,room.group_id = hk_v2_group.id,
+house_keeping_list_with_room_status,main query,room,CTE room,vp_prod_pms_house_keeping.hk_v2_room_reservation,CnchMergeTree,,INNER JOIN,room.group_id = hk_v2_group.id,
+house_keeping_list_with_room_status,CTE hk_v2_group,hk_v2_group,direct,vp_prod_pms_house_keeping.hk_v2_group,CnchMergeTree,,FROM,,status = 'COMMIT' AND propertyId IN ('$propertyId')
+house_keeping_list_with_room_status,CTE hk_shift,hk_shift,direct,vp_prod_pms_house_keeping.hk_shift,CnchMergeTree,,FROM,,
+house_keeping_list_with_room_status,CTE hk_v2_group_user_task,hk_v2_group_user_task,direct,vp_prod_pms_house_keeping.hk_v2_group_user_task,CnchMergeTree,,FROM,,
+house_keeping_list_with_room_status,CTE hk_user,hk_user,direct,vp_prod_pms_house_keeping.hk_user,CnchMergeTree,,FROM,,
+house_keeping_list_with_room_status,CTE hk_v2_group_room,hk_v2_group_room,direct,vp_prod_pms_house_keeping.hk_v2_group_room,CnchMergeTree,,FROM,,
+house_keeping_list_with_room_status,CTE hk_v2_room,hk_v2_room,direct,vp_prod_pms_house_keeping.hk_v2_room,CnchMergeTree,,FROM,,
+house_keeping_list_with_room_status,CTE hk_v2_room_reservation,hk_v2_room_reservation,direct,vp_prod_pms_house_keeping.hk_v2_room_reservation,CnchMergeTree,,FROM,,
+house_keeping_list_with_room_status,CTE assigned,hk_v2_group_user_task,CTE hk_v2_group_user_task,vp_prod_pms_house_keeping.hk_v2_group_user_task,CnchMergeTree,,FROM,,
+house_keeping_list_with_room_status,CTE assigned,hk_user,CTE hk_user,vp_prod_pms_house_keeping.hk_user,CnchMergeTree,,INNER JOIN,hk_user.id = hk_v2_group_user_task.user_id,
+house_keeping_list_with_room_status,CTE room,hk_v2_group_room,CTE hk_v2_group_room,vp_prod_pms_house_keeping.hk_v2_group_room,CnchMergeTree,,FROM,,
+house_keeping_list_with_room_status,CTE room,hk_v2_room,CTE hk_v2_room,vp_prod_pms_house_keeping.hk_v2_room,CnchMergeTree,,LEFT JOIN,hk_v2_room.id = hk_v2_group_room.room_id,
+house_keeping_list_with_room_status,CTE room,hk_v2_room_reservation,CTE hk_v2_room_reservation,vp_prod_pms_house_keeping.hk_v2_room_reservation,CnchMergeTree,,LEFT JOIN,hk_v2_room_reservation.id = hk_v2_room.id,
+in_house_guest_list,main query,,subquery ,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,
+in_house_guest_list,main query,,subquery ,vp_prod_pms_property.pro_room_type,CnchMergeTree,,FROM,,
+in_house_guest_list,main query,,subquery ,vp_prod_ops_front_office.Staying,CnchMergeTree,,FROM,,
+in_house_guest_list,main query,,subquery ,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,
+in_house_guest_list,main query,,subquery ,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,
+in_house_guest_list,main query,,subquery ,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+in_house_guest_list,main query,,subquery ,vp_prod_ops_front_office.SpecialRequest,CnchMergeTree,,FROM,,
+in_house_guest_list,main query,reservation,CTE reservation,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,
+in_house_guest_list,main query,room_type,CTE room_type,vp_prod_pms_property.pro_room_type,CnchMergeTree,,LEFT JOIN,binToString(reservation.room_type_id) = room_type.id,room_type.is_deleted = 0 AND room_type.is_pseudo = 0
+in_house_guest_list,main query,staying,CTE staying,vp_prod_ops_front_office.Staying,CnchMergeTree,,LEFT JOIN,reservation.reservation_id = staying.reservation_id,lower(staying.status) = 'inhouse'
+in_house_guest_list,main query,profile_guest,CTE profile_guest,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,LEFT JOIN,staying.reservation_id = profile_guest.reservation_id AND staying.profile_id = profile_guest.id,"lower(profile_guest.profile_type) IN ('mainguest', 'accompanyguest')"
+in_house_guest_list,main query,profile,CTE profile,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,LEFT JOIN,profile_guest.reference_id = profile.id,
+in_house_guest_list,main query,profile_agent,CTE profile_agent,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,LEFT JOIN,binToString(reservation.travel_agent_profile_id) = profile_agent.id AND binToString(reservation.reservation_id) = profile_agent.reservation_id,
+in_house_guest_list,main query,profile_company,CTE profile_company,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,LEFT JOIN,binToString(reservation.company_profile_id) = profile_company.id AND binToString(reservation.reservation_id) = profile_company.reservation_id,
+in_house_guest_list,main query,special_request,CTE special_request,vp_prod_ops_front_office.SpecialRequest,CnchMergeTree,,LEFT JOIN,reservation.reservation_id = special_request.reservation_id,
+in_house_guest_list,CTE reservation,Reservation,direct,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,lower(Status) = 'inhouse' AND binToString(PropertyId) IN ('$propertyId')
+in_house_guest_list,CTE room_type,pro_room_type,direct,vp_prod_pms_property.pro_room_type,CnchMergeTree,,FROM,,
+in_house_guest_list,CTE staying,Staying,direct,vp_prod_ops_front_office.Staying,CnchMergeTree,,FROM,,
+in_house_guest_list,CTE profile_guest,PmsProfile,direct,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,
+in_house_guest_list,CTE profile,Profile,direct,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,
+in_house_guest_list,CTE special_request,SpecialRequest,direct,vp_prod_ops_front_office.SpecialRequest,CnchMergeTree,,FROM,,
+in_house_guest_list,CTE profile_agent,v_stg__profile_alias,direct,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+in_house_guest_list,CTE profile_company,profile_agent,CTE profile_agent,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+journal_full,main query,,subquery ,vp_prod_ops_transaction_account.PostTransaction,CnchMergeTree,,FROM,,
+journal_full,main query,post_transaction,CTE post_transaction,vp_prod_ops_transaction_account.PostTransaction,CnchMergeTree,,FROM,,"bitAnd(post_transaction.include_exclude, 1) = 1 AND (post_transaction.state = 1 AND post_transaction.transaction_account_code <> '9980') OR (post_transaction.state = 5 AND post_transaction.transaction_reference_type = 'ORIGINAL_DP') AND post_transaction.business_date = toDate(now('Asia/Bangkok')) AND debit <> 0"
+journal_full,CTE post_transaction,PostTransaction,direct,vp_prod_ops_transaction_account.PostTransaction,CnchMergeTree,,FROM,,PropertyId IN ('$propertyId') AND CashierCode IN ('$cashierCodes') AND TransactionAccountCode IN ('$transactionCodes') AND RoomNumber IN ('$roomNumbers')
+journal_payment,main query,,subquery ,vp_prod_ops_transaction_account.PostTransaction,CnchMergeTree,,FROM,,
+journal_payment,main query,post_transaction,CTE post_transaction,vp_prod_ops_transaction_account.PostTransaction,CnchMergeTree,,FROM,,"bitAnd(post_transaction.include_exclude, 1) = 1 AND (post_transaction.state = 1 AND post_transaction.transaction_account_code <> '9980') OR (post_transaction.state = 5 AND post_transaction.transaction_reference_type = 'ORIGINAL_DP') AND post_transaction.business_date = toDate(now('Asia/Bangkok'))"
+journal_payment,CTE post_transaction,PostTransaction,direct,vp_prod_ops_transaction_account.PostTransaction,CnchMergeTree,,FROM,,CategoryType = 'PAYMENT' AND PropertyId IN ('$propertyId') AND CashierCode IN ('$cashierCodes') AND TransactionAccountCode IN ('$transactionCodes') AND RoomNumber IN ('$roomNumbers')
+reservation_180days,main query,,subquery ,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,
+reservation_180days,main query,,subquery ,vp_prod_ops_front_office.ReservationRoomRate,CnchMergeTree,,FROM,,
+reservation_180days,main query,,subquery ,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,
+reservation_180days,main query,,subquery ,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,
+reservation_180days,main query,,subquery ,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+reservation_180days,main query,,subquery ,vp_prod_ops_front_office.CheckIn,CnchMergeTree,,FROM,,
+reservation_180days,main query,final,CTE final,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,"staying_date >= toDate(now('Asia/Bangkok')) AND staying_date <= DATE_ADD(toDate(now('Asia/Bangkok')), INTERVAL '180' DAY)"
+reservation_180days,main query,final,CTE final,vp_prod_ops_front_office.ReservationRoomRate,CnchMergeTree,,FROM,,"staying_date >= toDate(now('Asia/Bangkok')) AND staying_date <= DATE_ADD(toDate(now('Asia/Bangkok')), INTERVAL '180' DAY)"
+reservation_180days,main query,final,CTE final,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,"staying_date >= toDate(now('Asia/Bangkok')) AND staying_date <= DATE_ADD(toDate(now('Asia/Bangkok')), INTERVAL '180' DAY)"
+reservation_180days,main query,final,CTE final,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,"staying_date >= toDate(now('Asia/Bangkok')) AND staying_date <= DATE_ADD(toDate(now('Asia/Bangkok')), INTERVAL '180' DAY)"
+reservation_180days,main query,final,CTE final,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,"staying_date >= toDate(now('Asia/Bangkok')) AND staying_date <= DATE_ADD(toDate(now('Asia/Bangkok')), INTERVAL '180' DAY)"
+reservation_180days,main query,final,CTE final,vp_prod_ops_front_office.CheckIn,CnchMergeTree,,FROM,,"staying_date >= toDate(now('Asia/Bangkok')) AND staying_date <= DATE_ADD(toDate(now('Asia/Bangkok')), INTERVAL '180' DAY)"
+reservation_180days,CTE reservation,Reservation,direct,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,binToString(PropertyId) IN ('$propertyId')
+reservation_180days,CTE reservation_room_rate,ReservationRoomRate,direct,vp_prod_ops_front_office.ReservationRoomRate,CnchMergeTree,,FROM,,IsDeleted = 0
+reservation_180days,CTE profile_guest,PmsProfile,direct,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,
+reservation_180days,CTE profile_booker,profile_guest,CTE profile_guest,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,
+reservation_180days,CTE check_in,CheckIn,direct,vp_prod_ops_front_office.CheckIn,CnchMergeTree,,FROM,,
+reservation_180days,CTE profile,Profile,direct,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,
+reservation_180days,CTE profile_agent,v_stg__profile_alias,direct,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+reservation_180days,CTE profile_company,profile_agent,CTE profile_agent,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,FROM,,
+reservation_180days,CTE final,reservation,CTE reservation,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,
+reservation_180days,CTE final,reservation_room_rate,CTE reservation_room_rate,vp_prod_ops_front_office.ReservationRoomRate,CnchMergeTree,,LEFT JOIN,reservation_room_rate.reservation_id = reservation.reservation_id,
+reservation_180days,CTE final,profile_guest,CTE profile_guest,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,LEFT JOIN,profile_guest.id = reservation.main_guest_profile_id,
+reservation_180days,CTE final,profile,CTE profile,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,LEFT JOIN,profile_guest.reference_id = profile.id,
+reservation_180days,CTE final,profile_agent,CTE profile_agent,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,LEFT JOIN,profile_agent.id = binToString(reservation.travel_agent_profile_id) AND binToString(reservation.reservation_id) = profile_agent.reservation_id,
+reservation_180days,CTE final,profile_company,CTE profile_company,datamart_v2.v_stg__profile_alias,View,vp_prod_ops_front_office.PmsProfile;vp_prod_ops_front_office.Reservation;vp_prod_ops_pms_profile.Profile,LEFT JOIN,profile_company.id = binToString(reservation.company_profile_id) AND binToString(reservation.reservation_id) = profile_company.reservation_id,
+reservation_180days,CTE final,profile_booker,CTE profile_booker,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,LEFT JOIN,profile_booker.id = reservation.booker_profile_id,
+reservation_180days,CTE final,check_in,CTE check_in,vp_prod_ops_front_office.CheckIn,CnchMergeTree,,LEFT JOIN,check_in.reservation_id = reservation.reservation_id,
+room_status,main query,,subquery ,vp_prod_pms_room_management.pro_room_status,CnchMergeTree,,FROM,,
+room_status,main query,,subquery ,vp_prod_pms_property.pro_room_type,CnchMergeTree,,FROM,,
+room_status,main query,,subquery ,vp_prod_ops_front_office.RoomAssignment,CnchMergeTree,,FROM,,
+room_status,main query,,subquery ,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,
+room_status,main query,,subquery ,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,
+room_status,main query,,subquery ,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,
+room_status,main query,,subquery ,vp_prod_ops_front_office.SpecialRequest,CnchMergeTree,,FROM,,
+room_status,main query,room,CTE room,vp_prod_pms_room_management.pro_room_status,CnchMergeTree,,FROM,,room.is_pseudo = 0 AND room.is_deleted = 0
+room_status,main query,room_type,CTE room_type,vp_prod_pms_property.pro_room_type,CnchMergeTree,,LEFT JOIN,room.room_type_id = room_type.id,room_type.is_pseudo = 0 AND room_type.is_deleted = 0
+room_status,main query,room_info,CTE room_info,vp_prod_pms_room_management.pro_room_status,CnchMergeTree,,LEFT JOIN,room.id = room_info.id,vip_code <> ''
+room_status,main query,room_info,CTE room_info,vp_prod_pms_property.pro_room_type,CnchMergeTree,,LEFT JOIN,room.id = room_info.id,vip_code <> ''
+room_status,main query,room_info,CTE room_info,vp_prod_ops_front_office.RoomAssignment,CnchMergeTree,,LEFT JOIN,room.id = room_info.id,vip_code <> ''
+room_status,main query,room_info,CTE room_info,vp_prod_ops_front_office.Reservation,CnchMergeTree,,LEFT JOIN,room.id = room_info.id,vip_code <> ''
+room_status,main query,room_info,CTE room_info,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,LEFT JOIN,room.id = room_info.id,vip_code <> ''
+room_status,main query,room_info,CTE room_info,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,LEFT JOIN,room.id = room_info.id,vip_code <> ''
+room_status,main query,room_info,CTE room_info,vp_prod_ops_front_office.SpecialRequest,CnchMergeTree,,LEFT JOIN,room.id = room_info.id,vip_code <> ''
+room_status,CTE room,pro_room_status,direct,vp_prod_pms_room_management.pro_room_status,CnchMergeTree,,FROM,,propertyId IN ('$propertyId')
+room_status,CTE room_type,pro_room_type,direct,vp_prod_pms_property.pro_room_type,CnchMergeTree,,FROM,,
+room_status,CTE room_assignment,RoomAssignment,direct,vp_prod_ops_front_office.RoomAssignment,CnchMergeTree,,FROM,,
+room_status,CTE reservation,Reservation,direct,vp_prod_ops_front_office.Reservation,CnchMergeTree,,FROM,,
+room_status,CTE profile_guest,PmsProfile,direct,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,FROM,,
+room_status,CTE profile,Profile,direct,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,FROM,,
+room_status,CTE special_request,SpecialRequest,direct,vp_prod_ops_front_office.SpecialRequest,CnchMergeTree,,FROM,,
+room_status,CTE room_info,room,CTE room,vp_prod_pms_room_management.pro_room_status,CnchMergeTree,,FROM,,"room.is_pseudo = 0 AND room.is_deleted = 0 AND CASE WHEN room.reservation_status <> 'NOT_RESERVED' THEN NOT (room_assignment.state IN ('INACTIVE', 'MOVE')) ELSE TRUE END AND (room.reservation_status = 'ARRIVED' AND room_assignment.from_date = toDate(now('Asia/Bangkok'))) OR (room.reservation_status IN ('ARRIVAL', 'DEPARTED_ARRIVAL', 'DUE_OUT_ARRIVAL') AND reservation.arrival_date = toDate(now('Asia/Bangkok'))) OR (room.reservation_status IN ('DEPARTED', 'DEPARTED_ARRIVAL', 'DUE_OUT', 'DUE_OUT_ARRIVAL') AND reservation.departure_date = toDate(now('Asia/Bangkok'))) OR (room.reservation_status = 'STAY_OVER' AND (reservation.arrival_date <= toDate(now('Asia/Bangkok')) AND reservation.departure_date >= toDate(now('Asia/Bangkok')))) OR (room.reservation_status = 'NOT_RESERVED')"
+room_status,CTE room_info,room_type,CTE room_type,vp_prod_pms_property.pro_room_type,CnchMergeTree,,LEFT JOIN,room.room_type_id = room_type.id,room_type.is_pseudo = 0 AND room_type.is_deleted = 0
+room_status,CTE room_info,room_assignment,CTE room_assignment,vp_prod_ops_front_office.RoomAssignment,CnchMergeTree,,LEFT JOIN,room.id = binToString(room_assignment.room_id),"CASE WHEN room.reservation_status <> 'NOT_RESERVED' THEN NOT (room_assignment.state IN ('INACTIVE', 'MOVE')) ELSE TRUE END AND (room.reservation_status = 'ARRIVED' AND room_assignment.from_date = toDate(now('Asia/Bangkok'))) OR (room.reservation_status IN ('ARRIVAL', 'DEPARTED_ARRIVAL', 'DUE_OUT_ARRIVAL') AND reservation.arrival_date = toDate(now('Asia/Bangkok'))) OR (room.reservation_status IN ('DEPARTED', 'DEPARTED_ARRIVAL', 'DUE_OUT', 'DUE_OUT_ARRIVAL') AND reservation.departure_date = toDate(now('Asia/Bangkok'))) OR (room.reservation_status = 'STAY_OVER' AND (reservation.arrival_date <= toDate(now('Asia/Bangkok')) AND reservation.departure_date >= toDate(now('Asia/Bangkok')))) OR (room.reservation_status = 'NOT_RESERVED')"
+room_status,CTE room_info,reservation,CTE reservation,vp_prod_ops_front_office.Reservation,CnchMergeTree,,LEFT JOIN,room_assignment.reservation_id = reservation.reservation_id,"(room.reservation_status = 'ARRIVED' AND room_assignment.from_date = toDate(now('Asia/Bangkok'))) OR (room.reservation_status IN ('ARRIVAL', 'DEPARTED_ARRIVAL', 'DUE_OUT_ARRIVAL') AND reservation.arrival_date = toDate(now('Asia/Bangkok'))) OR (room.reservation_status IN ('DEPARTED', 'DEPARTED_ARRIVAL', 'DUE_OUT', 'DUE_OUT_ARRIVAL') AND reservation.departure_date = toDate(now('Asia/Bangkok'))) OR (room.reservation_status = 'STAY_OVER' AND (reservation.arrival_date <= toDate(now('Asia/Bangkok')) AND reservation.departure_date >= toDate(now('Asia/Bangkok')))) OR (room.reservation_status = 'NOT_RESERVED')"
+room_status,CTE room_info,profile_guest,CTE profile_guest,vp_prod_ops_front_office.PmsProfile,CnchMergeTree,,LEFT JOIN,reservation.main_guest_profile_id = profile_guest.id,
+room_status,CTE room_info,profile,CTE profile,vp_prod_ops_pms_profile.Profile,CnchMergeTree,,LEFT JOIN,profile_guest.reference_id = profile.id,
+room_status,CTE room_info,special_request,CTE special_request,vp_prod_ops_front_office.SpecialRequest,CnchMergeTree,,LEFT JOIN,reservation.reservation_id = special_request.reservation_id,
+task_list,main query,,subquery ,vp_prod_aux_task_management.task,CnchMergeTree,,FROM,,
+task_list,main query,,subquery ,vp_prod_aux_task_management.department,CnchMergeTree,,FROM,,
+task_list,main query,task,CTE task,vp_prod_aux_task_management.task,CnchMergeTree,,FROM,,
+task_list,main query,department,CTE department,vp_prod_aux_task_management.department,CnchMergeTree,,INNER JOIN,task.tm_type = department.code AND task.hotel_id = department.hotel_id,
+task_list,CTE department,department,direct,vp_prod_aux_task_management.department,CnchMergeTree,,FROM,,isDeleted = 0
+task_list,CTE task,task,direct,vp_prod_aux_task_management.task,CnchMergeTree,,FROM,,date(dueDate) >= toDate(now('Asia/Bangkok')) AND hotelId IN ('$propertyId')

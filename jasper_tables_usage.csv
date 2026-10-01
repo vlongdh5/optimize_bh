@@ -1,0 +1,33 @@
+﻿table,in_top28,size_gb,rows,unique_key,order_by,partition_by,reports_direct,reports_via_view,reports_total,table_scans,scans_without_filter,join_usages,distinct_filters,reports_list
+vp_prod_ops_transaction_account.PostTransaction,yes,88.391,214412075,"(Id, PropertyId)","Id, PropertyId",toYYYYMM(CreatedAt),5,0,5,5,0,2,PropertyId IN ('$propertyId') || IsDeposit = 1 AND State = 1 AND PropertyId IN ('$propertyId') || PropertyId IN ('$propertyId') AND CashierCode IN ('$cashierCodes') AND TransactionAccountCode IN ('$transactionCodes') AND RoomNumber IN ('$roomNumbers') || CategoryType = 'PAYMENT' AND PropertyId IN ('$propertyId') AND CashierCode IN ('$cashierCodes') AND TransactionAccountCode IN ('$transactionCodes') AND RoomNumber IN ('$roomNumbers'),deposit_ledger;guest_ledger;guest_ledger_detail;journal_full;journal_payment
+vp_prod_ops_front_office.PmsProfile,yes,4.626,26678647,sipHash64(Id),Id,,12,0,12,12,9,14,CASE WHEN '$isMainGuestOnly' THEN ProfileType = 'MainGuest' ELSE TRUE END || PropertyId IN ('$propertyId'),alerts;arrival_list_7days;arrival_list_today;cancellation;departure_list_7days;departure_list_today;deposit_ledger;guest_inh_pm_account_by_room;guest_inhouse_rate_check;in_house_guest_list;reservation_180days;room_status
+vp_prod_ops_front_office.ReservationRoomRate,yes,4.09,14708533,sipHash64(Id),Id,,3,0,3,3,0,3,is_deleted = 0 || IsDeleted = 0 AND binToString(PropertyId) IN ('$propertyId') || IsDeleted = 0,cancellation;guest_inhouse_rate_check;reservation_180days
+vp_prod_pms_house_keeping.hk_v2_group_room,no,3.095,16338774,tuple(id),id,,1,0,1,1,1,1,,house_keeping_list_with_room_status
+vp_prod_ops_accounts_receivable.ARInvoice,yes,2.665,7255422,tuple(Id),Id,,1,0,1,1,0,0,"Type IN (0, 1, 4) AND PropertyId IN ('$propertyId')",aging_summary
+vp_prod_ops_front_office.Reservation,yes,2.644,6224389,sipHash64(Id),Id,,12,0,12,12,1,4,"NOT (lower(Status) IN ('canceled', 'noshow')) AND binToString(PropertyId) IN ('$propertyId') || binToString(PropertyId) IN ('$propertyId') || lower(Status) <> 'canceled' || lower(Status) = 'canceled' AND binToString(PropertyId) IN ('$propertyId') || lower(Status) = 'inhouse' AND binToString(PropertyId) IN ('$propertyId') AND RoomTypeId IN ('$roomTypeIds') || lower(Status) IN ('inhouse', 'checkout') AND binToString(PropertyId) IN ('$propertyId') || lower(Status) = 'inhouse' AND binToString(PropertyId) IN ('$propertyId')",alerts;arrival_list_7days;arrival_list_today;cancellation;departure_list_7days;departure_list_today;deposit_ledger;guest_inh_pm_account_by_room;guest_inhouse_rate_check;in_house_guest_list;reservation_180days;room_status
+vp_prod_ops_front_office.Staying,yes,2.567,13413477,sipHash64(Id),Id,,2,0,2,2,2,2,,guest_inhouse_rate_check;in_house_guest_list
+vp_prod_ops_transaction_account.Folio,yes,2.48,10631891,tuple(Id),Id,,2,0,2,2,0,4,PropertyId IN ('$propertyId'),guest_ledger;guest_ledger_detail
+vp_prod_ops_transaction_account.Reservation,yes,2.167,6225437,tuple(Id),Id,,2,0,2,4,0,0,lower(Status) <> 'inhouse' AND CurrentLedger = 'GL' AND Status IN ('$reservationStatuses') AND PropertyId IN ('$propertyId') || lower(Status) = 'inhouse' AND Status IN ('$reservationStatuses') AND PropertyId IN ('$propertyId'),guest_ledger;guest_ledger_detail
+vp_prod_ops_pms_profile.Profile,yes,2.059,9993727,tuple(Id),Id,,11,0,11,11,10,12,PropertyId IN ('$propertyId'),arrival_list_7days;arrival_list_today;cancellation;departure_list_7days;departure_list_today;deposit_ledger;guest_inh_pm_account_by_room;guest_inhouse_rate_check;in_house_guest_list;reservation_180days;room_status
+vp_prod_aux_task_management.task,no,1.682,8551269,tuple(tmCode),tmCode,,1,0,1,1,0,0,date(dueDate) >= toDate(now('Asia/Bangkok')) AND hotelId IN ('$propertyId'),task_list
+vp_prod_ops_front_office.RoomAssignment,yes,0.736,7487731,sipHash64(Id),Id,,1,0,1,1,1,2,,room_status
+vp_prod_ops_front_office.CheckIn,yes,0.547,4911109,sipHash64(Id),Id,,3,0,3,3,3,3,,departure_list_7days;departure_list_today;reservation_180days
+vp_prod_ops_front_office.ReservationAlert,no,0.329,2780858,sipHash64(Id),Id,,1,0,1,1,0,0,binToString(PropertyId) IN ('$propertyId'),alerts
+vp_prod_ops_front_office.SpecialRequest,no,0.152,2383564,sipHash64(id),id,,4,0,4,4,4,5,,arrival_list_7days;arrival_list_today;in_house_guest_list;room_status
+vp_prod_ops_transaction_account.FixedCharge,no,0.108,537865,tuple(Id),Id,,1,0,1,1,1,1,,guest_inhouse_rate_check
+vp_prod_ops_front_office.Cancellation,no,0.102,1165282,sipHash64(Id),Id,,1,0,1,1,1,1,,cancellation
+vp_prod_pms_house_keeping.hk_v2_group_user_task,no,0.095,624770,tuple(id),id,,1,0,1,1,1,1,,house_keeping_list_with_room_status
+vp_prod_pms_house_keeping.hk_v2_group,no,0.054,466048,tuple(id),id,,1,0,1,1,0,0,status = 'COMMIT' AND propertyId IN ('$propertyId'),house_keeping_list_with_room_status
+vp_prod_cts_customer.user,no,0.041,208877,tuple(id),id,,1,0,1,1,1,2,,alerts
+vp_prod_pms_house_keeping.hk_v2_room_reservation,no,0.012,50501,tuple(id),id,,1,0,1,1,1,2,,house_keeping_list_with_room_status
+vp_prod_pms_room_management.pro_room_status,no,0.01,65695,tuple(id),id,,1,0,1,1,0,1,propertyId IN ('$propertyId'),room_status
+vp_prod_pms_house_keeping.hk_v2_room,no,0.009,53770,tuple(id),id,,1,0,1,1,1,2,,house_keeping_list_with_room_status
+vp_prod_ops_front_office.Room,no,0.006,50772,sipHash64(Id),Id,,3,0,3,3,3,3,,arrival_list_7days;arrival_list_today;guest_inh_pm_account_by_room
+vp_prod_ops_accounts_receivable.ARCreditLimit,no,0.001,6718,tuple(Id),Id,,1,0,1,1,1,1,,aging_summary
+vp_prod_pms_house_keeping.hk_user,no,0.001,11436,tuple(id),id,,1,0,1,1,1,2,,house_keeping_list_with_room_status
+vp_prod_ops_accounts_receivable.AccountsReceivable,no,0.0,2774,tuple(Id),Id,,1,0,1,1,1,1,,aging_summary
+vp_prod_ops_front_office.AlertConfig,no,0.0,407,sipHash64(Id),Id,,1,0,1,1,1,1,,alerts
+vp_prod_pms_property.pro_room_type,no,0.0,1524,tuple(id),id,,7,0,7,7,7,9,,arrival_list_7days;arrival_list_today;departure_list_7days;departure_list_today;guest_inhouse_rate_check;in_house_guest_list;room_status
+vp_prod_ops_front_office.CancellationConfig,no,0.0,1124,sipHash64(Id),Id,,1,0,1,1,1,1,,cancellation
+vp_prod_pms_house_keeping.hk_shift,no,0.0,1029,tuple(id),id,,1,0,1,1,1,1,,house_keeping_list_with_room_status
+vp_prod_aux_task_management.department,no,0.0,932,tuple(id),id,,1,0,1,1,0,1,isDeleted = 0,task_list
